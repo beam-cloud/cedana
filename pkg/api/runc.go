@@ -247,6 +247,7 @@ func (s *service) RuncRestore(ctx context.Context, args *task.RuncRestoreArgs) (
 	opts := &container.RuncOpts{
 		Root:          args.GetOpts().GetRoot(),
 		Bundle:        args.GetOpts().GetBundle(),
+		ConfigPath:    args.GetOpts().GetConfigPath(),
 		ConsoleSocket: args.GetOpts().GetConsoleSocket(),
 		Detach:        args.GetOpts().GetDetach(),
 		NetPid:        int(args.GetOpts().GetNetPid()),

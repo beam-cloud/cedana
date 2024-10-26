@@ -24,6 +24,7 @@ type RuncOpts struct {
 	Root            string
 	ContainerId     string
 	Bundle          string
+	ConfigPath      string
 	SystemdCgroup   bool
 	NoPivot         bool
 	NoMountFallback bool
@@ -145,6 +146,9 @@ func RuncRestore(imgPath string, containerId string, criuOpts *CriuOpts, opts *R
 	var spec rspec.Spec
 
 	configPath := opts.Bundle + "/config.json"
+	if opts.ConfigPath != "" {
+		configPath = opts.ConfigPath
+	}
 
 	if err := readJSON(configPath, &spec); err != nil {
 		return err
@@ -188,6 +192,7 @@ func RuncRestore(imgPath string, containerId string, criuOpts *CriuOpts, opts *R
 		Root:          opts.Root,
 		ContainerId:   containerId,
 		Bundle:        opts.Bundle,
+		ConfigPath:    opts.ConfigPath,
 		ConsoleSocket: opts.ConsoleSocket,
 		PidFile:       "",
 		Detach:        opts.Detach,
