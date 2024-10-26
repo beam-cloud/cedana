@@ -74,6 +74,11 @@ func (s *service) JobRestore(ctx context.Context, args *task.JobRestoreArgs) (*t
 		return nil, status.Error(codes.FailedPrecondition, "GPU support is not enabled in daemon")
 	}
 
+	runcOpts := args.RuncOpts
+	if runcOpts == nil {
+		runcOpts = &task.RuncOpts{}
+	}
+
 	// Check if normal process or container
 	if state.ContainerID == "" {
 		restoreResp, err := s.Restore(ctx, &task.RestoreArgs{
@@ -89,18 +94,24 @@ func (s *service) JobRestore(ctx context.Context, args *task.JobRestoreArgs) (*t
 		res.Message = restoreResp.Message
 	} else {
 		opts := &task.RuncOpts{}
-		opts.Detach = args.RuncOpts.Detach
-		opts.ConsoleSocket = args.RuncOpts.ConsoleSocket
-		opts.Bundle = args.RuncOpts.Bundle
+
+		opts.Detach = runcOpts.Detach
+		opts.ConsoleSocket = runcOpts.ConsoleSocket
+		opts.Bundle = runcOpts.Bundle
 		if opts.Bundle == "" {
 			// Use saved bundle if not overridden from args
 			opts.Bundle = state.ContainerBundle
 		}
-		opts.Root = args.RuncOpts.Root
+
+		opts.Root = runcOpts.Root
 		if opts.Root == "" {
 			// Use saved root if not overridden from args
 			opts.Root = state.ContainerRoot
 		}
+
+		// If set, this overrides the default config.json path in a bundle
+		opts.ConfigPath = runcOpts.ConfigPath
+
 		restoreResp, err := s.RuncRestore(ctx, &task.RuncRestoreArgs{
 			ContainerID: state.ContainerID,
 			ImagePath:   state.CheckpointPath,
